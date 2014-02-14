@@ -1,0 +1,17 @@
+<h1>Edit Post</h1>
+
+<%= form_for :post, url: post_path, html: {method: :put} do |f| %>
+  <p>
+    <%= f.label :title %><br>
+    <%= f.text_field :title %>
+  </p>
+
+  <p>
+    <%= f.label :message %><br>
+    <%= f.text_area :message %>
+  </p>
+
+  <p>
+    <%= f.submit %>
+  </p>
+<% end %>

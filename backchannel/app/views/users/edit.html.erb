@@ -1,0 +1,27 @@
+<h1>Edit User</h1>
+
+<%= form_for :user, url: user_path, html: {method: :put} do |f| %>
+  <p>
+    <%= f.label :user_name %><br>
+    <%= f.text_field :user_name %>
+  </p>
+
+  <p>
+    <%= f.label :email %><br>
+    <%= f.text_field :email %>
+  </p>
+
+  <p>
+    <%= f.label :password %><br>
+    <%= f.text_field :password %>
+  </p>
+
+  <p>
+    <%= f.label :rights %><br>
+    <%= f.select :rights, [["User", "user"], ["Admin", "admin"], ["Super Admin", "super"]] %>
+  </p>
+
+  <p>
+    <%= f.submit %>
+  </p>
+<% end %>
