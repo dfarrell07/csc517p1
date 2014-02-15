@@ -1,20 +1,17 @@
 class UsersController < ApplicationController
   before_filter :get_user, only: [:show, :update, :edit, :destroy]
 
+  def new
+    @user = User.new
+  end
+
   def create
-    if user_params[:password] != user_params[:confirm_password]
-      flash[:error] = "Password and confirmation didn't match! :("
-    elsif User.exists?(:email => user_params[:email])
-      flash[:error] = "That email address is taken! :("
+    @user = User.new(user_params.except(:confirm_password))
+    if @user.save
+      redirect_to root_url, :notice => "Signed up!"
     else
-      @user = User.new(user_params.except(:confirm_password))
-      if @user.save != false
-        flash[:notice] = "New user created! :)"
-      else
-        flash[:error] = "Failed to create user for an unknown reason! :("
-      end
+      render "new"
     end
-    redirect_to users_path
   end
 
   def show

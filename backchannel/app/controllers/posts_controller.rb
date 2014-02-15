@@ -1,6 +1,6 @@
 class PostsController < ApplicationController
   before_filter :get_post, only: [:show, :update, :edit, :destroy]
-  #before_filter :check_auth, :only => [:edit]
+  before_filter :check_auth, :only => [:edit]
 
   def create
     @post = Post.new(post_params)
@@ -45,11 +45,11 @@ class PostsController < ApplicationController
     @post = Post.find(params[:id])
   end
 
-  #def check_auth
-  #  if session[:user_id] != @post.user_id
-  #    flash[:notice] = "You can only edit your own posts"
-  #    redirect_to @post
-  #  end
-  #end
+  def check_auth
+    if session[:user_id] != @post.user_id
+      flash[:notice] = "You can only edit your own posts"
+      redirect_to @post
+    end
+  end
 
 end
