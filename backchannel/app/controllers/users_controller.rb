@@ -2,11 +2,17 @@ class UsersController < ApplicationController
   before_filter :get_user, only: [:show, :update, :edit, :destroy]
 
   def create
-    if params[:password] != params[:confirm_password]
-      flash[:error] = "Password and confirmation didn't match."
+    if user_params[:password] != user_params[:confirm_password]
+      flash[:error] = "Password and confirmation didn't match! :("
+    elsif User.exists?(:email => user_params[:email])
+      flash[:error] = "That email address is taken! :("
     else
-      @user = User.new(user_params)
-      @user.save
+      @user = User.new(user_params.except(:confirm_password))
+      if @user.save != false
+        flash[:notice] = "New user created! :)"
+      else
+        flash[:error] = "Failed to create user for an unknown reason! :("
+      end
     end
     redirect_to users_path
   end
@@ -22,7 +28,7 @@ class UsersController < ApplicationController
   end
 
   def update
-    @user.update(user_params)
+    @user.update(user_params.except(:confirm_password))
     if @user.save == false
       flash[:error] = "Failed up save user update."
     else
@@ -36,10 +42,13 @@ class UsersController < ApplicationController
     redirect_to users_path
   end
 
+  def login
+  end
+
   private
 
   def user_params
-    params.require(:user).permit(:email, :user_name, :password, :rights, :id)
+    params.require(:user).permit(:email, :user_name, :password, :rights, :id, :confirm_password)
   end
 
   def get_user
