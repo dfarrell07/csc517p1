@@ -1,15 +1,36 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
-one:
-  email: MyString
-  user_name: MyString
-  password_hash: MyString
-  password_salt: MyString
-  rights: MyString
+super:
+  email: super@admin.com
+  user_name: super
+  password_hash: super_hash
+  password_salt: super_salt
+  rights: super
 
-two:
-  email: MyString
-  user_name: MyString
-  password_hash: MyString
-  password_salt: MyString
-  rights: MyString
+admin:
+  email: admin@admin.com
+  user_name: admin
+  password_hash: admin_hash
+  password_salt: admin_salt
+  rights: admin
+
+admin2:
+  email: admin2@admin.com
+  user_name: admin2
+  password_hash: admin2_hash
+  password_salt: admin2_salt
+  rights: admin
+
+dfarrell07:
+  email: dfarrell07@gmail.com
+  user_name: dfarrell07
+  password_hash: dfarrell07_hash
+  password_salt: dfarrell07_salt
+  rights: user
+
+jghall07:
+  email: jghall07@gmail.com
+  user_name: jghall07
+  password_hash: jghal07_hash
+  password_salt: jghall07_salt
+  rights: user
