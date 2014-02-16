@@ -3,11 +3,13 @@
 one:
   email: MyString
   user_name: MyString
-  password: MyString
+  password_hash: MyString
+  password_salt: MyString
   rights: MyString
 
 two:
   email: MyString
   user_name: MyString
-  password: MyString
+  password_hash: MyString
+  password_salt: MyString
   rights: MyString
