@@ -1,5 +1,8 @@
 class UsersController < ApplicationController
   before_filter :get_user, only: [:show, :update, :edit, :destroy]
+  before_filter :check_logged_in, only: [:edit, :update, :destroy]
+  #before_filter :check_logged_in, only: [:check_owns_or_admin]
+  before_filter :check_owns_or_admin, only: [:edit, :update, :destroy]
 
   def new
     @user = User.new
@@ -50,6 +53,27 @@ class UsersController < ApplicationController
 
   def get_user
     @user = User.find(params[:id])
+  end
+
+  def check_owns
+    if session[:user_id] != @user.id
+      flash[:notice] = "You can only edit your own account!"
+      redirect_to users_path
+    end
+  end
+
+  def check_owns_or_admin
+    if session[:user_id] != @user.id and User.find(session[:user_id]).rights == "user"
+      flash[:notice] = "You can only edit your own account!"
+      redirect_to users_path
+    end
+  end
+
+  def check_logged_in
+    if session[:user_id].nil?
+      flash[:notice] = "You must be logged in!"
+      redirect_to users_path
+    end
   end
 
 end

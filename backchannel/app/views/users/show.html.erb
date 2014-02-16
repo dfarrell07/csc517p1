@@ -12,3 +12,9 @@
   <strong>Rights:</strong>
     <%= @user.rights %>
 </p>
+
+<p>
+  <%= link_to "Edit", edit_user_path %>
+  <%= link_to "Delete", user_path, :method => :delete  %>
+  <%= link_to "User list", users_path %>
+</p>
