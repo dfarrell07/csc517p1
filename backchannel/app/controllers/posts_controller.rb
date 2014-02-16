@@ -1,6 +1,7 @@
 class PostsController < ApplicationController
   before_filter :get_post, only: [:show, :update, :edit, :destroy]
   before_filter :check_owns, :only => [:edit, :update]
+  before_filter :check_logged_in, :only => [:edit, :update, :destroy]
   before_filter :check_owns_or_admin, :only => [:destroy]
 
   def create
@@ -51,6 +52,13 @@ class PostsController < ApplicationController
     if session[:user_id] != @post.user_id
       flash[:notice] = "You can only edit your own posts!"
       redirect_to posts_path
+    end
+  end
+
+  def check_logged_in
+    if session[:user_id].nil?
+      flash[:notice] = "You must be logged in!"
+      redirect_to users_path
     end
   end
 
