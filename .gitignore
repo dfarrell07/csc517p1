@@ -1,0 +1,4 @@
+# Hiding out the IDE files
+.idea/
+
+*.swp
