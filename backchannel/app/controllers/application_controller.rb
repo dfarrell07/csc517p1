@@ -7,6 +7,12 @@ class ApplicationController < ActionController::Base
   private
 
   def current_user
+    if User.where(:id => session[:user_id]).count == 0
+      if not session[:user_id].nil?
+        flash[:notice] = "Your account no longer exists!"
+      end
+      session[:user_id] = nil
+    end
     @current_user ||= User.find(session[:user_id]) if session[:user_id]
   end
 end
