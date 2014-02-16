@@ -10,5 +10,12 @@
 
 <p>
   <strong>By:</strong>
-  <%= @post.user_id %>
+  <%= @user_name %>
+</p>
+
+<p>
+  <%= link_to "Edit", edit_post_path %>
+  <%= link_to "Delete", post_path, :method => :delete  %>
+  <%= link_to "New", new_post_path %>
+  <%= link_to "Post list", posts_path %>
 </p>
