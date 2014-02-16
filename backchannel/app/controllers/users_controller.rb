@@ -28,7 +28,7 @@ class UsersController < ApplicationController
       end
     end
 
-    @user = User.new(user_params.except(:confirm_password))
+    @user = User.new(user_params)
     if @only_account == true
       flash[:notice] = "You're the first user! You were upgraded to Super Admin!"
       @user.rights = "super"
@@ -55,7 +55,7 @@ class UsersController < ApplicationController
     if @user.rights == "super" and user_params[:rights] != "super"
       flash[:error] = "You can't demote the Super Admin!"
     else
-      @user.update(user_params.except(:confirm_password))
+      @user.update(user_params)
       if @user.save == false
         flash[:error] = "Failed up save user update."
       else
@@ -76,7 +76,7 @@ class UsersController < ApplicationController
   private
 
   def user_params
-    params.require(:user).permit(:email, :user_name, :password, :rights, :id, :confirm_password)
+    params.require(:user).permit(:email, :user_name, :password, :rights, :id, :password_confirmation, :password_digest)
   end
 
   def get_user
