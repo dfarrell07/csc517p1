@@ -3,6 +3,7 @@ class UsersController < ApplicationController
   before_filter :check_logged_in, only: [:edit, :update, :destroy]
   before_filter :check_owns_or_admin, only: [:edit, :update, :destroy]
   before_filter :check_not_super, only: [:destroy]
+  before_filter :check_not_admin_on_admin, only: [:destroy, :edit]
 
   def new
     if User.count == 0
@@ -110,4 +111,10 @@ class UsersController < ApplicationController
     end
   end
 
+  def check_not_admin_on_admin
+    if @user.rights != "user" and User.find(session[:user_id]).rights == "admin" and session[:user_id] != @user.id
+      flash[:error] = "Admins can't edit other admin's data!"
+      redirect_to users_path
+    end
+  end
 end
