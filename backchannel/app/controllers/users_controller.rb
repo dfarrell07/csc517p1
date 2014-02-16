@@ -1,7 +1,6 @@
 class UsersController < ApplicationController
   before_filter :get_user, only: [:show, :update, :edit, :destroy]
   before_filter :check_logged_in, only: [:edit, :update, :destroy]
-  #before_filter :check_logged_in, only: [:check_owns_or_admin]
   before_filter :check_owns_or_admin, only: [:edit, :update, :destroy]
 
   def new
@@ -9,6 +8,19 @@ class UsersController < ApplicationController
   end
 
   def create
+    if user_params[:rights] != "user"
+      if session[:user_id].nil?
+        flash[:error] = "You can't create an admin, who are you?!"
+        redirect_to log_in_path
+        return
+      end
+      if User.find(session[:user_id]).rights == "user"
+        flash[:error] = "You can't create an admin, you're a user!"
+        redirect_to users_path
+        return
+      end
+    end
+
     @user = User.new(user_params.except(:confirm_password))
     if @user.save
       redirect_to root_url, :notice => "Signed up!"
