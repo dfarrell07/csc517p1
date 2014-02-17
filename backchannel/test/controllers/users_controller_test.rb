@@ -32,15 +32,14 @@ class UsersControllerTest < ActionController::TestCase
     assert_difference("User.count") do
       post :create, user: @basic_user
     end
-    assert_redirected_to log_in_path
     assert_equal "Signed up!", flash[:notice]
   end
 
-  test "should log user in at creation time" do
+  test "should send to log in page at creation time" do
     assert_difference("User.count") do
       post :create, user: @basic_user
     end
-    assert_not_nil session[:user_id], "KNOWN BUG: See Isses#10"
+    assert_redirected_to log_in_path
   end
 
   test "password and confirm must match" do
