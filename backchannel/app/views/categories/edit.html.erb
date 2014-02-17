@@ -1,0 +1,18 @@
+<h1>Edit Category</h1>
+
+<%= form_for :category, url: category_path, html: {method: :put} do |f| %>
+  <p>
+    <%= f.label "Name of Category" %><br>
+    <%= f.text_field :name %>
+  </p>
+
+  <p>
+    <%= f.label :status%><br>
+    <%= f.select :status, [["Pending", "pending"], ["Approved", "approved"]] %>
+  </p>
+
+  <p>
+    <%= f.submit %>
+  </p>
+<% end %>
+

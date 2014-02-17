@@ -1,10 +1,6 @@
 require 'test_helper'
 
 class UsersControllerTest < ActionController::TestCase
-  test "the truth" do
-    assert true
-  end
-
   test "should get index" do
     get :index
     assert_response :success
@@ -45,5 +41,4 @@ class UsersControllerTest < ActionController::TestCase
     end
     assert_equal "You can't create an admin, who are you?!", flash[:error]
   end
-    
 end

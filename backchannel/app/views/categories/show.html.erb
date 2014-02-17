@@ -1,0 +1,17 @@
+<p>
+  <strong>Category Name:</strong>
+  <%= @category.name %>
+</p>
+ 
+<p>
+  <strong>Status:</strong>
+  <%= @category.status %>
+</p>
+
+<p>
+  <%= link_to "Edit", edit_category_path %>
+  <%= link_to "Delete", category_path, :method => :delete  %>
+  <%= link_to "New", new_category_path %>
+  <%= link_to "Categories list", categories_path %>
+</p>
+
