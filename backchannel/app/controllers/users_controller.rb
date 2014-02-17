@@ -39,7 +39,7 @@ class UsersController < ApplicationController
     @user = User.new(user_params)
     if @user.save
       flash[:notice] = "Signed up!"
-      redirect_to root_url
+      redirect_to log_in_path
     else
       render "new"
     end

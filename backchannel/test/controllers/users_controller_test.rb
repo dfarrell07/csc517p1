@@ -4,8 +4,7 @@ class UsersControllerTest < ActionController::TestCase
 
   setup :build_basic_user_dict
 
-  def teardown
-  end
+  # Getting basic pages
 
   test "should get index" do
     get :index
@@ -27,11 +26,13 @@ class UsersControllerTest < ActionController::TestCase
     assert_not_nil assigns(:user)
   end
 
+  # Creating user tests
+
   test "should create user" do
     assert_difference("User.count") do
       post :create, user: @basic_user
     end
-    assert_redirected_to root_path
+    assert_redirected_to log_in_path
     assert_equal "Signed up!", flash[:notice]
   end
 
@@ -61,7 +62,7 @@ class UsersControllerTest < ActionController::TestCase
 
   # Creating admin tests
 
-  test "can not create admin when logged out" do
+  test "should not create admin when logged out" do
     assert_difference("User.count", 0) do
       @basic_user[:rights] = "admin"
       post :create, user: @basic_user
@@ -69,7 +70,7 @@ class UsersControllerTest < ActionController::TestCase
     assert_equal "You can't create an admin, who are you?!", flash[:error]
   end
 
-  test "can not create admin when user" do
+  test "should not create admin when user" do
     become_user
     assert_difference("User.count", 0) do
       @basic_user[:rights] = "admin"
@@ -78,9 +79,29 @@ class UsersControllerTest < ActionController::TestCase
     assert_equal "You can't create an admin/super, you're a user!", flash[:error]
   end
 
+  test "should create admin when admin" do
+    become_admin
+    assert_difference("User.count") do
+      @basic_user[:rights] = "admin"
+      post :create, user: @basic_user
+    end
+    assert_redirected_to log_in_path
+    assert_equal "Signed up!", flash[:notice]
+  end
+
+  test "should create admin when super" do
+    become_super
+    assert_difference("User.count") do
+      @basic_user[:rights] = "admin"
+      post :create, user: @basic_user
+    end
+    assert_redirected_to log_in_path
+    assert_equal "Signed up!", flash[:notice]
+  end
+
   # Creating super tests
 
-  test "can not create super when logged out" do
+  test "should not create super when logged out" do
     log_out
     assert_difference("User.count", 0) do
       @basic_user[:rights] = "super"
@@ -89,7 +110,7 @@ class UsersControllerTest < ActionController::TestCase
     assert_equal "There can only be one Super Admin!", flash[:error]
   end
 
-  test "can not create super when user" do
+  test "should not create super when user" do
     become_user
     assert_difference("User.count", 0) do
       @basic_user[:rights] = "super"
@@ -98,7 +119,7 @@ class UsersControllerTest < ActionController::TestCase
     assert_equal "There can only be one Super Admin!", flash[:error]
   end
 
-  test "can not create super when admin" do
+  test "should not create super when admin" do
     become_admin
     assert_difference("User.count", 0) do
       @basic_user[:rights] = "super"
@@ -107,7 +128,7 @@ class UsersControllerTest < ActionController::TestCase
     assert_equal "There can only be one Super Admin!", flash[:error]
   end
 
-  test "can not create super when super" do
+  test "should not create super when super" do
     become_super
     assert_difference("User.count", 0) do
       @basic_user[:rights] = "super"
@@ -302,9 +323,33 @@ class UsersControllerTest < ActionController::TestCase
 
   # Creating first user tests
 
+  test "first user should be super" do
+    destroy_all_users
+    log_out
+    @basic_user[:rights] = "super"
+    assert_difference("User.count") do
+      post :create, user: @basic_user
+    end
+    assert_redirected_to root_path
+    assert_equal "super", User.first.rights
+    assert_equal "You're the first user! You were upgraded to Super Admin!", flash[:notice]
+  end
+
   test "first user should be super even if user chosen" do
     destroy_all_users
     log_out
+    assert_difference("User.count") do
+      post :create, user: @basic_user
+    end
+    assert_redirected_to root_path
+    assert_equal "super", User.first.rights
+    assert_equal "You're the first user! You were upgraded to Super Admin!", flash[:notice]
+  end
+
+  test "first user should be super even if admin chosen" do
+    destroy_all_users
+    log_out
+    @basic_user[:rights] = "admin"
     assert_difference("User.count") do
       post :create, user: @basic_user
     end
