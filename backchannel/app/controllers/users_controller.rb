@@ -23,6 +23,14 @@ class UsersController < ApplicationController
         flash[:error] = "You can't create an admin/super, you're a user!"
         redirect_to users_path
         return
+      else
+        @user = User.new(user_params)
+        if @user.save
+          flash[:notice] = "Signed up!"
+          redirect_to root_url
+        else
+          render "new"
+        end
       end
     else # if creating user or there are 0 users
       @user = User.new(user_params)
