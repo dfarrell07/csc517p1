@@ -14,10 +14,17 @@ class UsersControllerTest < ActionController::TestCase
   end
 
   test "should get show" do
-    get(:show, {"id" => users(:dfarrell07).id})
+    become_user
+    get(:show, {"id" => users(:user).id})
     assert_response :success
     assert_not_nil assigns(:user)
-    assert_equal users(:dfarrell07).id, assigns(:user).id
+    assert_equal users(:user).id, assigns(:user).id
+  end
+
+  test "should get new" do
+    get :new
+    assert_response :success
+    assert_not_nil assigns(:user)
   end
 
   test "should create user" do
@@ -63,7 +70,7 @@ class UsersControllerTest < ActionController::TestCase
   end
 
   test "can not create admin when user" do
-    session[:user_id] = users(:dfarrell07)
+    become_user
     assert_difference("User.count", 0) do
       @basic_user[:rights] = "admin"
       post :create, user: @basic_user
@@ -74,55 +81,54 @@ class UsersControllerTest < ActionController::TestCase
   # Creating super tests
 
   test "can not create super when logged out" do
-    session[:user_id] = nil
+    log_out
     assert_difference("User.count", 0) do
       @basic_user[:rights] = "super"
       post :create, user: @basic_user
     end
-    assert_equal "You can't create an admin, who are you?!", flash[:error]
+    assert_equal "There can only be one Super Admin!", flash[:error]
   end
 
   test "can not create super when user" do
-    session[:user_id] = users(:dfarrell07)
+    become_user
     assert_difference("User.count", 0) do
       @basic_user[:rights] = "super"
       post :create, user: @basic_user
     end
-    assert_equal "You can't create an admin/super, you're a user!", flash[:error]
+    assert_equal "There can only be one Super Admin!", flash[:error]
   end
 
   test "can not create super when admin" do
-    session[:user_id] = users(:admin)
-    assert_difference("User.count", 0, message: "KNOWN BUG: See Issues#12") do
+    become_admin
+    assert_difference("User.count", 0) do
       @basic_user[:rights] = "super"
       post :create, user: @basic_user
     end
-    assert_equal "There can only be one Super Admin!", flash[:error], "KNOWN BUG: See Issues#12"
+    assert_equal "There can only be one Super Admin!", flash[:error]
   end
 
   test "can not create super when super" do
-    session[:user_id] = users(:super)
-    assert_difference("User.count", 0, message: "KNOWN BUG: See Issues#12") do
+    become_super
+    assert_difference("User.count", 0) do
       @basic_user[:rights] = "super"
       post :create, user: @basic_user
     end
-    assert_equal "There can only be one Super Admin!", flash[:error], "KNOWN BUG: See Issues#12"
-
+    assert_equal "There can only be one Super Admin!", flash[:error]
   end
 
   # Destroying user tests
 
   test "should not be able to destroy user if logged out" do
-    session[:user_id] = nil
+    log_out
     assert_difference("User.count", 0) do
-      delete :destroy, id: users(:dfarrell07).id
+      delete :destroy, id: users(:user).id
     end
     assert_equal "You must be logged in!", flash[:error]
   end
 
   test "should not be able to destroy user if user" do
-    session[:user_id] = users(:dfarrell07).id
-    assert_not_equal users(:dfarrell07).id, users(:jghall07).id
+    become_user
+    assert_not_equal session[:user_id], users(:jghall07).id
     assert_difference("User.count", 0) do
       delete :destroy, id: users(:jghall07).id
     end
@@ -130,23 +136,23 @@ class UsersControllerTest < ActionController::TestCase
   end
 
   test "should be able to destroy user if admin" do
-    session[:user_id] = users(:admin).id
+    become_admin
     assert_difference("User.count", -1) do
-      delete :destroy, id: users(:dfarrell07).id
+      delete :destroy, id: users(:user).id
     end
   end
 
   test "should be able to destroy user if super" do
-    session[:user_id] = users(:super).id
+    become_super
     assert_difference("User.count", -1) do
-      delete :destroy, id: users(:dfarrell07).id
+      delete :destroy, id: users(:user).id
     end
   end
 
   # Destroying admin tests
 
   test "should not be able to destroy admin if logged out" do
-    session[:user_id] = nil
+    log_out
     assert_difference("User.count", 0) do
       delete :destroy, id: users(:admin).id
     end
@@ -154,7 +160,7 @@ class UsersControllerTest < ActionController::TestCase
   end
 
   test "should not be able to destroy admin if user" do
-    session[:user_id] = users(:dfarrell07).id
+    become_user
     assert_difference("User.count", 0) do
       delete :destroy, id: users(:admin).id
     end
@@ -162,8 +168,8 @@ class UsersControllerTest < ActionController::TestCase
   end
 
   test "should not be able to destroy admin if admin" do
-    session[:user_id] = users(:admin).id
-    assert_not_equal users(:admin).id, users(:admin2).id
+    become_admin
+    assert_not_equal session[:user_id], users(:admin2).id
     assert_difference("User.count", 0) do
       delete :destroy, id: users(:admin2).id
     end
@@ -171,7 +177,7 @@ class UsersControllerTest < ActionController::TestCase
   end
 
   test "should be able to destroy admin if super" do
-    session[:user_id] = users(:super).id
+    become_super
     assert_difference("User.count", -1) do
       delete :destroy, id: users(:admin).id
     end
@@ -180,7 +186,7 @@ class UsersControllerTest < ActionController::TestCase
   # Destroying super tests
 
   test "no one should be able to destroy super" do
-    [users(:dfarrell07), users(:admin), users(:super)].each do |user|
+    [users(:user), users(:admin), users(:super)].each do |user|
       session[:user_id] = user.id
       assert_difference("User.count", 0) do
         delete :destroy, id: users(:super).id
@@ -189,11 +195,122 @@ class UsersControllerTest < ActionController::TestCase
     end
   end
 
-  # Viewing "credentials" tests
+  # Viewing user "credentials" tests
 
   test "should not show user when logged out" do
+    log_out
+    get(:show, {"id" => users(:user).id})
+    assert_nil assigns(:user)
+  end
+
+  test "should not show user when user" do
+    become_user
+    assert_not_equal session[:user_id], users(:dfarrell07).id
     get(:show, {"id" => users(:dfarrell07).id})
-    assert_nil assigns(:user), "KNOWN BUG: See Issues#13"
+    assert_nil assigns(:user)
+  end
+
+  test "should show user when admin" do
+    become_admin
+    get(:show, {"id" => users(:user).id})
+    assert_not_nil assigns(:user)
+  end
+
+  test "should show user when super" do
+    become_super
+    get(:show, {"id" => users(:user).id})
+    assert_not_nil assigns(:user)
+  end
+
+  # Viewing admin "credentials" tests
+
+  test "should not show admin when logged out" do
+    log_out
+    get(:show, {"id" => users(:admin).id})
+    assert_nil assigns(:user)
+  end
+
+  test "should not show admin when user" do
+    become_user
+    get(:show, {"id" => users(:admin).id})
+    assert_nil assigns(:user)
+  end
+
+  test "should not show admin when admin" do
+    become_admin
+    assert_not_equal session[:user_id], users(:admin2).id
+    get(:show, {"id" => users(:admin2).id})
+    assert_nil assigns(:user)
+  end
+
+  test "should show admin when super" do
+    become_super
+    get(:show, {"id" => users(:admin).id})
+    assert_not_nil assigns(:user)
+  end
+
+  # Viewing super "credentials" tests
+
+  test "should not show super when logged out" do
+    log_out
+    get(:show, {"id" => users(:super).id})
+    assert_nil assigns(:user)
+  end
+
+  test "should not show super when user" do
+    become_user
+    get(:show, {"id" => users(:super).id})
+    assert_nil assigns(:user)
+  end
+
+  test "should not show super when admin" do
+    become_admin
+    assert_not_equal session[:user_id], users(:admin2).id
+    get(:show, {"id" => users(:admin2).id})
+    assert_nil assigns(:user)
+  end
+
+  test "should show super when super" do
+    become_super
+    get(:show, {"id" => users(:super).id})
+    assert_not_nil assigns(:user)
+  end
+
+  # Showing self "credentials"
+
+  test "should show self when user" do
+    become_user
+    get(:show, {"id" => session[:user_id]})
+    assert_not_nil assigns(:user)
+    assert_equal users(:user).id, assigns(:user).id
+  end
+
+  test "should show self when admin" do
+    become_admin
+    get(:show, {"id" => session[:user_id]})
+    assert_not_nil assigns(:user)
+    assert_equal users(:admin).id, assigns(:user).id
+  end
+
+  test "should show self when super" do
+    become_super
+    get(:show, {"id" => session[:user_id]})
+    assert_not_nil assigns(:user)
+    assert_equal users(:super).id, assigns(:user).id
+  end
+
+
+  # Creating first user tests
+
+  test "first user should be super even if user chosen" do
+    destroy_all_users
+    log_out
+    assert_difference("User.count") do
+      post :create, user: @basic_user
+    end
+    assert_redirected_to root_path
+    assert_equal "super", User.first.rights
+    assert_equal "You're the first user! You were upgraded to Super Admin!", flash[:notice]
   end
 
   private
@@ -209,5 +326,19 @@ class UsersControllerTest < ActionController::TestCase
   def get_message
     assigns(:user).errors.full_messages[0]
   end
+
+  def destroy_all_users
+    session[:user_id] = "super"
+    User.all.each do |user|
+      assert_difference("User.count", -1) do
+        user.destroy
+      end
+    end
+  end
+
+  def log_out; session[:user_id] = nil; end
+  def become_super; session[:user_id] = users(:super).id; end
+  def become_admin; session[:user_id] = users(:admin).id; end
+  def become_user; session[:user_id] = users(:user).id; end
   
 end

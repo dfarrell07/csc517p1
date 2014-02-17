@@ -17,6 +17,12 @@ admin2:
   password_digest: admin2_digest
   rights: admin
 
+user:
+  email: user@gmail.com
+  user_name: user
+  password_digest: user_digest
+  rights: user
+
 dfarrell07:
   email: dfarrell07@gmail.com
   user_name: dfarrell07
