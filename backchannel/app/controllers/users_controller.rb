@@ -13,31 +13,29 @@ class UsersController < ApplicationController
   end
 
   def create
-    if User.count == 0 and user_params[:rights] != "super"
-      @only_account = true
-    elsif user_params[:rights] != "user"
+    if user_params[:rights] != "user" and User.count != 0
       if session[:user_id].nil?
         flash[:error] = "You can't create an admin, who are you?!"
         redirect_to log_in_path
         return
       end
       if User.find(session[:user_id]).rights == "user"
-        flash[:error] = "You can't create an admin, you're a user!"
+        flash[:error] = "You can't create an admin/super, you're a user!"
         redirect_to users_path
         return
       end
-    end
-
-    @user = User.new(user_params)
-    if @only_account == true
-      flash[:notice] = "You're the first user! You were upgraded to Super Admin!"
-      @user.rights = "super"
-    end
-    if @user.save
-      flash[:notice] = "Signed up!"
-      redirect_to root_url
-    else
-      render "new"
+    else # if creating user or there are 0 users
+      @user = User.new(user_params)
+      if User.count != 0
+        flash[:notice] = "You're the first user! You were upgraded to Super Admin!"
+        @user.rights = "super"
+      end
+      if @user.save
+        flash[:notice] = "Signed up!"
+        redirect_to root_url
+      else
+        render "new"
+      end
     end
   end
 
