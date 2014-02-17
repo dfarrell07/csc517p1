@@ -1,0 +1,14 @@
+<h1>Propose Category</h1>
+
+Your category will need to be approved by an admin.
+
+<%= form_for :category, url: categories_path do |f| %>
+  <p>
+    <%= f.label "Name of Category" %><br>
+    <%= f.text_field :name %>
+  </p>
+
+  <p>
+    <%= f.submit "Propose Category" %>
+  </p>
+<% end %>
