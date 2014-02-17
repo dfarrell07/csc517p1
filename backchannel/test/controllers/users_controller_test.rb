@@ -52,6 +52,8 @@ class UsersControllerTest < ActionController::TestCase
     assert_equal "Email has already been taken", get_message
   end
 
+  # Creating admin tests
+
   test "can not create admin when logged out" do
     assert_difference("User.count", 0) do
       @basic_user[:rights] = "admin"
@@ -67,6 +69,17 @@ class UsersControllerTest < ActionController::TestCase
       post :create, user: @basic_user
     end
     assert_equal "You can't create an admin/super, you're a user!", flash[:error]
+  end
+
+  # Creating super tests
+
+  test "can not create super when logged out" do
+    session[:user_id] = nil
+    assert_difference("User.count", 0) do
+      @basic_user[:rights] = "super"
+      post :create, user: @basic_user
+    end
+    assert_equal "You can't create an admin, who are you?!", flash[:error]
   end
 
   test "can not create super when user" do
@@ -95,6 +108,92 @@ class UsersControllerTest < ActionController::TestCase
     end
     assert_equal "There can only be one Super Admin!", flash[:error], "KNOWN BUG: See Issues#12"
 
+  end
+
+  # Destroying user tests
+
+  test "should not be able to destroy user if logged out" do
+    session[:user_id] = nil
+    assert_difference("User.count", 0) do
+      delete :destroy, id: users(:dfarrell07).id
+    end
+    assert_equal "You must be logged in!", flash[:error]
+  end
+
+  test "should not be able to destroy user if user" do
+    session[:user_id] = users(:dfarrell07).id
+    assert_not_equal users(:dfarrell07).id, users(:jghall07).id
+    assert_difference("User.count", 0) do
+      delete :destroy, id: users(:jghall07).id
+    end
+    assert_equal "You can only edit your own account!", flash[:error]
+  end
+
+  test "should be able to destroy user if admin" do
+    session[:user_id] = users(:admin).id
+    assert_difference("User.count", -1) do
+      delete :destroy, id: users(:dfarrell07).id
+    end
+  end
+
+  test "should be able to destroy user if super" do
+    session[:user_id] = users(:super).id
+    assert_difference("User.count", -1) do
+      delete :destroy, id: users(:dfarrell07).id
+    end
+  end
+
+  # Destroying admin tests
+
+  test "should not be able to destroy admin if logged out" do
+    session[:user_id] = nil
+    assert_difference("User.count", 0) do
+      delete :destroy, id: users(:admin).id
+    end
+    assert_equal "You must be logged in!", flash[:error]
+  end
+
+  test "should not be able to destroy admin if user" do
+    session[:user_id] = users(:dfarrell07).id
+    assert_difference("User.count", 0) do
+      delete :destroy, id: users(:admin).id
+    end
+    assert_equal "You can only edit your own account!", flash[:error]
+  end
+
+  test "should not be able to destroy admin if admin" do
+    session[:user_id] = users(:admin).id
+    assert_not_equal users(:admin).id, users(:admin2).id
+    assert_difference("User.count", 0) do
+      delete :destroy, id: users(:admin2).id
+    end
+    assert_equal "Admins can't edit other admin's data!", flash[:error]
+  end
+
+  test "should be able to destroy admin if super" do
+    session[:user_id] = users(:super).id
+    assert_difference("User.count", -1) do
+      delete :destroy, id: users(:admin).id
+    end
+  end
+
+  # Destroying super tests
+
+  test "no one should be able to destroy super" do
+    [users(:dfarrell07), users(:admin), users(:super)].each do |user|
+      session[:user_id] = user.id
+      assert_difference("User.count", 0) do
+        delete :destroy, id: users(:super).id
+      end
+      assert_not_nil flash[:error]
+    end
+  end
+
+  # Viewing "credentials" tests
+
+  test "should not show user when logged out" do
+    get(:show, {"id" => users(:dfarrell07).id})
+    assert_nil assigns(:user), "KNOWN BUG: See Issues#13"
   end
 
   private

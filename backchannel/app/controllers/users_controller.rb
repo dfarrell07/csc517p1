@@ -91,28 +91,28 @@ class UsersController < ApplicationController
 
   def check_owns
     if session[:user_id] != @user.id
-      flash[:notice] = "You can only edit your own account!"
+      flash[:error] = "You can only edit your own account!"
       redirect_to users_path
     end
   end
 
   def check_owns_or_admin
     if session[:user_id] != @user.id and User.find(session[:user_id]).rights == "user"
-      flash[:notice] = "You can only edit your own account!"
+      flash[:error] = "You can only edit your own account!"
       redirect_to users_path
     end
   end
 
   def check_logged_in
     if session[:user_id].nil?
-      flash[:notice] = "You must be logged in!"
+      flash[:error] = "You must be logged in!"
       redirect_to users_path
     end
   end
 
   def check_not_super
     if @user.rights == "super"
-      flash[:notice] = "You can't delete the Super Admin!"
+      flash[:error] = "You can't delete the Super Admin!"
       redirect_to users_path
     end
   end

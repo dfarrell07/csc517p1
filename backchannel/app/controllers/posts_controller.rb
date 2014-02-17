@@ -57,7 +57,7 @@ class PostsController < ApplicationController
 
   def check_logged_in
     if session[:user_id].nil?
-      flash[:notice] = "You must be logged in!"
+      flash[:error] = "You must be logged in!"
       redirect_to users_path
     end
   end
