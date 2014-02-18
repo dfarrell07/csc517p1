@@ -14,11 +14,17 @@
 </p>
 
 <p>
+  <strong>Votes:</strong>
+  <%= Vote.where(:post_id => @post.id).count %>
+</p>
+
+<p>
   <strong>By:</strong>
   <%= @user_name %>
 </p>
 
 <p>
+  <%= link_to "Up Vote", up_vote_post_path(@post.id) %>
   <%= link_to "Edit", edit_post_path %>
   <%= link_to "Delete", post_path, :method => :delete  %>
   <%= link_to "New", new_post_path %>

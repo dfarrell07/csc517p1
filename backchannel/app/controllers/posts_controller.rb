@@ -51,6 +51,30 @@ class PostsController < ApplicationController
     redirect_to posts_path
   end
 
+  def up_vote
+    @post_id = params[:id]
+    @user_id = session[:user_id]
+    if Vote.exists?(post_id: @post_id, user_id: @user_id)
+      flash[:error] = "You've already voted for this post!"
+      redirect_to posts_path
+      return
+    end
+
+    if Post.find(@post_id).user_id == @user_id
+      flash[:error] = "You can't vote for your own post!"
+      redirect_to posts_path
+      return
+    end
+
+    vote = Vote.new(post_id: @post_id, user_id: @user_id)
+    if vote.save
+      flash[:notice] = "Vote for post counted!"
+    else
+      flash[:error] = "Unable to save vote!"
+    end
+    redirect_to posts_path
+  end
+
   private
 
   def post_params
