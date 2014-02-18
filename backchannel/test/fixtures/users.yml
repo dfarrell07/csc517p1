@@ -40,3 +40,10 @@ jghall07:
   password_digest: jghal07_digest
   rights: user
   id: 6
+
+poster:
+  email: poster@gmail.com
+  user_name: poster
+  password_digest: poster_digest
+  rights: user
+  id: 7

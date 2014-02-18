@@ -1,7 +1,7 @@
 class PostsController < ApplicationController
   before_filter :get_post, only: [:show, :update, :edit, :destroy]
+  before_filter :check_logged_in, :only => [:new, :create, :edit, :update, :destroy]
   before_filter :check_owns, :only => [:edit, :update]
-  before_filter :check_logged_in, :only => [:new, :edit, :update, :destroy]
   before_filter :check_owns_or_admin, :only => [:destroy]
 
   def new
@@ -13,8 +13,8 @@ class PostsController < ApplicationController
   def create
     @post = Post.new(post_params)
     @post.user_id = session[:user_id]
-    #@post.user_id = 1234 
     @post.save
+    flash[:notice] = "Post created!"
     redirect_to @post
   end
 
@@ -32,7 +32,7 @@ class PostsController < ApplicationController
   def update
     @post.update(post_params)
     if @post.save == false
-      flash[:error] = "Failed up save post update."
+      flash[:error] = "Failed up save post update!"
     else
       flash[:notice] = "Post updated!"
     end
@@ -56,7 +56,7 @@ class PostsController < ApplicationController
 
   def check_owns
     if session[:user_id] != @post.user_id
-      flash[:notice] = "You can only edit your own posts!"
+      flash[:error] = "You can only edit your own posts!"
       redirect_to posts_path
     end
   end
@@ -74,7 +74,7 @@ class PostsController < ApplicationController
 
   def check_owns_or_admin
     if session[:user_id] != @post.user_id and User.find(session[:user_id]).rights == "user"
-      flash[:notice] = "You can only edit your own posts!"
+      flash[:error] = "You can only edit your own posts!"
       redirect_to posts_path
     end
   end
