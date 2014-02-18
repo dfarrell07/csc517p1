@@ -12,6 +12,15 @@
   </p>
 
   <p>
+    <%= f.label :category %><br>
+    <% if @category_list == nil or @category_list == []%>
+      <i>No categories!</i>
+    <% else %>
+      <%= f.select :category, @category_list %>
+    <% end %>
+  </p>
+
+  <p>
     <%= f.submit %>
   </p>
 <% end %>

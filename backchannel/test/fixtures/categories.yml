@@ -3,7 +3,9 @@
 homework1:
   name: homework1
   status: approved
+  id: 1
 
 homework2:
   name: homework2 
   status: pending
+  id: 2

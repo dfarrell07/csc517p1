@@ -80,7 +80,7 @@ class PostsControllerTest < ActionController::TestCase
     assert_not_equal users(:super).id, posts(:one).user_id
     assert_not_equal users(:admin).id, posts(:one).user_id
     assert_not_equal users(:user).id, posts(:one).user_id
-    [users(:super).id, users(:admin).id, users(:dfarrell07).id].each do |user_id|
+    [users(:super).id, users(:admin).id, users(:user).id].each do |user_id|
       session[:user_id] = user_id
       get(:edit, {id: posts(:one)}, {user_id: user_id})
       assert_redirected_to posts_path
@@ -149,13 +149,27 @@ class PostsControllerTest < ActionController::TestCase
     end
   end
 
+  # Category tests
+
+  test "should always have category" do
+    become_user
+    [users(:super).id, users(:admin).id, users(:user).id].each do |user_id|
+      session[:user_id] = user_id
+      assert_difference("Post.count") do
+        post :create, post: @basic_post
+      end
+      assert_equal "Post created!", flash[:notice]
+      assert_not_nil assigns(:post)
+      assert_not_nil assigns(:post).category_id, "Category not assigned"
+    end
+  end
+
   private
 
   def build_basic_post_dict
     @basic_post = {title: "Post1",
                    message: "Message1",
-                   user_id: 1,
-                   category_id: 1,
+                   category: categories(:homework1).name,
                    id: 1}
   end
 

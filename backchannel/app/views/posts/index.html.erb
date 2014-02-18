@@ -3,6 +3,7 @@
 <table>
   <tr>
     <th>Title</th>
+    <th>Category</th>
     <th>User</th>
     <th>Edit</th>
     <th>Delete</th>
@@ -11,6 +12,7 @@
   <% @posts.each do |post| %>
     <tr>
       <td><%= link_to post.title, post_path(post) %></td>
+      <td><%= Category.exists?(post.category_id) ? Category.find(post.category_id).name : "No such category! "%></td>
       <td><%= User.exists?(post.user_id) ? User.find(post.user_id).user_name : "No such user!"  %></td>
       <td><%= link_to "Edit", edit_post_path(post)  %></td>
       <td><%= link_to "Delete", post_path(post), :method => :delete %></td>

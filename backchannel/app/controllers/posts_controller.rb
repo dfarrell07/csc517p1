@@ -1,8 +1,12 @@
 class PostsController < ApplicationController
+  attr_accessor :category_list
   before_filter :get_post, only: [:show, :update, :edit, :destroy]
+  before_filter :get_category, only: [:create]
+  before_filter :get_category_list, only: [:new]
   before_filter :check_logged_in, :only => [:new, :create, :edit, :update, :destroy]
   before_filter :check_owns, :only => [:edit, :update]
   before_filter :check_owns_or_admin, :only => [:destroy]
+  
 
   def new
     if logged_in?
@@ -11,7 +15,9 @@ class PostsController < ApplicationController
   end
 
   def create
-    @post = Post.new(post_params)
+    @post = Post.new(post_params.except(:category))
+    #@post.category_id = Category.where(:name => post_params[:category])
+    @post.category_id = @category.id
     @post.user_id = session[:user_id]
     @post.save
     flash[:notice] = "Post created!"
@@ -20,6 +26,7 @@ class PostsController < ApplicationController
 
   def show
     @user_name = User.find(@post.user_id).user_name
+    @category_name = Category.find(@post.category_id).name
   end
 
   def index
@@ -47,11 +54,26 @@ class PostsController < ApplicationController
   private
 
   def post_params
-    params.require(:post).permit(:title, :message)
+    params.require(:post).permit(:title, :message, :category)
   end
 
   def get_post
     @post = Post.find(params[:id])
+  end
+
+  def get_category
+    if Category.where(:name => post_params[:category]).empty?
+      @category = nil
+    else
+      @category = Category.where(:name => post_params[:category])[0]
+    end
+  end
+
+  def get_category_list
+    @category_list = []
+    Category.where(:status => "approved").each do |category|
+      @category_list << [category.name.capitalize, category.name]
+    end
   end
 
   def check_owns
