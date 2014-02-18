@@ -3,7 +3,7 @@ class PostsController < ApplicationController
   before_filter :get_post, only: [:show, :update, :edit, :destroy]
   before_filter :get_category, only: [:create]
   before_filter :get_category_list, only: [:new]
-  before_filter :check_logged_in, :only => [:new, :create, :edit, :update, :destroy]
+  before_filter :check_logged_in, :only => [:new, :create, :edit, :update, :destroy, :up_vote]
   before_filter :check_owns, :only => [:edit, :update]
   before_filter :check_owns_or_admin, :only => [:destroy]
   

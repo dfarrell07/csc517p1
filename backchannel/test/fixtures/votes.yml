@@ -2,8 +2,22 @@
 
 one:
   post_id: 1
-  user_id: 1
+  user_id: 8
+  id: 1
 
 two:
   post_id: 1
+  user_id: 8
+  id: 2
+
+three:
+  post_id: 2
   user_id: 1
+
+four:
+  post_id: 2
+  user_id: 2
+
+five:
+  post_id: 2
+  user_id: 4

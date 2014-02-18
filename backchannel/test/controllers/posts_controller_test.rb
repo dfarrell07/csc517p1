@@ -164,6 +164,68 @@ class PostsControllerTest < ActionController::TestCase
     end
   end
 
+  # Vote tests
+
+  test "should up vote" do
+    become_user
+    assert_difference("Vote.count") do
+      get(:up_vote, {id: posts(:one)})
+    end
+    assert_equal "Vote for post counted!", flash[:notice]
+    assert_redirected_to posts_path
+  end
+
+  test "should not be able to vote when logged out" do
+    log_out
+    assert_difference("Vote.count", 0) do
+      get(:up_vote, {id: posts(:one)})
+    end
+    assert_equal "Must be logged in!", flash[:error]
+    assert_redirected_to posts_path
+  end
+
+  test "should up vote with any rights excluding logged out" do
+    assert !vote_exists?(users(:super).id, posts(:one).id), "Vote already exists"
+    assert !vote_exists?(users(:admin).id, posts(:one).id), "Vote already exists"
+    assert !vote_exists?(users(:user).id, posts(:one).id), "Vote already exists"
+    [users(:super).id, users(:admin).id, users(:user).id].each do |user_id|
+      session[:user_id] = user_id
+      assert_difference("Vote.count") do
+        get(:up_vote, {id: posts(:one)})
+      end
+      assert_equal "Vote for post counted!", flash[:notice]
+      assert_redirected_to posts_path
+    end
+  end
+
+  test "should not be able to vote twice for same post" do
+    assert vote_exists?(users(:super).id, posts(:two).id)
+    assert vote_exists?(users(:admin).id, posts(:two).id)
+    assert vote_exists?(users(:user).id, posts(:two).id)
+    [users(:super).id, users(:admin).id, users(:user).id].each do |user_id|
+      session[:user_id] = user_id
+      assert_difference("Vote.count", 0) do
+        get(:up_vote, {id: posts(:two)})
+      end
+      assert_equal "You've already voted for this post!", flash[:error]
+      assert_redirected_to posts_path
+    end
+  end
+
+  test "should not be able to vote for own post" do
+    assert user_owns_post?(users(:super).id, posts(:super_post).id)
+    assert user_owns_post?(users(:admin).id, posts(:admin_post).id)
+    assert user_owns_post?(users(:user).id, posts(:user_post).id)
+    {users(:super).id => posts(:super_post), users(:admin).id => posts(:admin_post), users(:user).id => posts(:user_post)}.each do |user_id, post|
+      session[:user_id] = user_id
+      assert_difference("Vote.count", 0) do
+        get(:up_vote, {id: post})
+      end
+      assert_equal "You can't vote for your own post!", flash[:error]
+      assert_redirected_to posts_path
+    end
+  end
+
   private
 
   def build_basic_post_dict
@@ -173,6 +235,14 @@ class PostsControllerTest < ActionController::TestCase
                    id: 1}
   end
 
+  def vote_exists?(user_id, post_id)
+    vote = Vote.where(user_id: user_id, post_id: post_id)
+    !vote.empty?
+  end
+
+  def user_owns_post?(user_id, post_id)
+    post = Post.where(user_id: user_id, id: post_id)
+  end
 
   def log_out; session[:user_id] = nil; end
   def become_super; session[:user_id] = users(:super).id; end

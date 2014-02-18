@@ -47,3 +47,10 @@ poster:
   password_digest: poster_digest
   rights: user
   id: 7
+
+voter:
+  email: voter@gmail.com
+  user_name: voter
+  password_digest: voter_digest
+  rights: user
+  id: 8

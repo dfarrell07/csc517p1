@@ -20,3 +20,24 @@ three:
   user_id: 7
   category_id: 1
   id: 3
+
+super_post:
+  title: "SuperPost"
+  message: "Post by super"
+  user_id: 1
+  category_id: 1
+  id: 4
+
+admin_post:
+  title: "AdminPost"
+  message: "Post by admin"
+  user_id: 2
+  category_id: 1
+  id: 5
+
+user_post:
+  title: "UserPost"
+  message: "Post by user"
+  user_id: 4
+  category_id: 1
+  id: 6
