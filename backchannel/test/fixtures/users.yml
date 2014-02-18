@@ -4,33 +4,39 @@ super:
   email: super@admin.com
   user_name: super
   rights: super
+  id: 1
 
 admin:
   email: admin@admin.com
   user_name: admin
   password_digest: admin_digest
   rights: admin
+  id: 2
 
 admin2:
   email: admin2@admin.com
   user_name: admin2
   password_digest: admin2_digest
   rights: admin
+  id: 3
 
 user:
   email: user@gmail.com
   user_name: user
   password_digest: user_digest
   rights: user
+  id: 4
 
 dfarrell07:
   email: dfarrell07@gmail.com
   user_name: dfarrell07
   password_digest: dfarrell07_digest
   rights: user
+  id: 5
 
 jghall07:
   email: jghall07@gmail.com
   user_name: jghall07
   password_digest: jghal07_digest
   rights: user
+  id: 6

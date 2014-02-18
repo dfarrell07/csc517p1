@@ -1,8 +1,14 @@
 class PostsController < ApplicationController
   before_filter :get_post, only: [:show, :update, :edit, :destroy]
   before_filter :check_owns, :only => [:edit, :update]
-  before_filter :check_logged_in, :only => [:edit, :update, :destroy]
+  before_filter :check_logged_in, :only => [:new, :edit, :update, :destroy]
   before_filter :check_owns_or_admin, :only => [:destroy]
+
+  def new
+    if logged_in?
+      @post = Post.new
+    end
+  end
 
   def create
     @post = Post.new(post_params)
@@ -55,10 +61,14 @@ class PostsController < ApplicationController
     end
   end
 
+  def logged_in?
+    session[:user_id] != nil
+  end
+
   def check_logged_in
     if session[:user_id].nil?
-      flash[:error] = "You must be logged in!"
-      redirect_to users_path
+      flash[:error] = "Must be logged in!"
+      redirect_to posts_path
     end
   end
 
