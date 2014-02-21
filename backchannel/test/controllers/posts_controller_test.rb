@@ -2,7 +2,7 @@ require 'test_helper'
 
 class PostsControllerTest < ActionController::TestCase
 
-  setup :build_basic_post_dict
+  setup :build_basic_post_dict, :build_basic_comment_dict
 
   # Testing fixture
   test "should have post one" do
@@ -92,7 +92,7 @@ class PostsControllerTest < ActionController::TestCase
     become_poster
     assert_equal session[:user_id], posts(:one).user_id
     get(:edit, {id: posts(:one)}, {user_id: users(:poster).id})
-    assert :success
+    assert_response :success
     assert_nil flash[:error]
   end
 
@@ -114,7 +114,7 @@ class PostsControllerTest < ActionController::TestCase
     assert_difference("Post.count", -1) do
       delete :destroy, id: posts(:one)
     end
-    assert :success
+    assert_redirected_to posts_path
     assert_nil flash[:error]
   end
 
@@ -124,7 +124,7 @@ class PostsControllerTest < ActionController::TestCase
     assert_difference("Post.count", -1) do
       delete :destroy, id: posts(:one)
     end
-    assert :success
+    assert_redirected_to posts_path
     assert_nil flash[:error]
   end
 
@@ -134,7 +134,7 @@ class PostsControllerTest < ActionController::TestCase
     assert_difference("Post.count", -1) do
       delete :destroy, id: posts(:one)
     end
-    assert :success
+    assert_redirected_to posts_path
     assert_nil flash[:error]
   end
 
@@ -144,7 +144,7 @@ class PostsControllerTest < ActionController::TestCase
     User.all.each do |user|
       session[:user_id] = user.id
       get(:show, {"id" => posts(:one)})
-      assert :success
+      assert_response :success
       assert_nil flash[:error]
     end
   end
@@ -226,6 +226,70 @@ class PostsControllerTest < ActionController::TestCase
     end
   end
 
+  # New (action) comment tests
+
+  test "should get new comment if logged in" do
+    become_user
+    get :new_comment, {post_id: posts(:one).id}
+    assert_response :success
+    assert_not_nil assigns(:comment)
+  end
+
+  test "should not get new comment if not logged in" do
+    log_out
+    get(:new_comment, {post_id: posts(:one)})
+    assert_equal "Must be logged in!", flash[:error]
+    assert_redirected_to posts_path
+    assert_nil assigns(:comment)
+  end
+
+  # Creating comment tests
+
+  test "should not create comment when logged out" do
+    log_out
+    assert_difference("Comment.count", 0) do
+      get :create_comment, {post_id: posts(:one)}
+    end
+    assert_equal "Must be logged in!", flash[:error]
+  end
+
+  test "should create comment when user" do
+    become_user
+    assert_difference("Comment.count", 1) do
+      get :create_comment, @basic_comment
+    end
+    assert_equal "Commented!", flash[:notice]
+    assert_redirected_to post_path(@basic_comment[:post_id])
+    assert_not_nil assigns(:comment)
+    assert Comment.exists?(post_id: @basic_comment[:post_id], message: @basic_comment[:comment][:message])
+    assert_equal @basic_comment[:post_id], assigns(:comment).post_id
+    assert_equal @basic_comment[:comment][:message], assigns(:comment).message
+  end
+
+  test "should create comment when admin" do
+    become_admin
+    assert_difference("Comment.count", 1) do
+      get :create_comment, @basic_comment
+    end
+    assert_equal "Commented!", flash[:notice]
+    assert_redirected_to posts(:one)
+    assert Comment.exists?(post_id: @basic_comment[:post_id], message: @basic_comment[:comment][:message])
+    assert_equal @basic_comment[:post_id], assigns(:comment).post_id
+    assert_equal @basic_comment[:comment][:message], assigns(:comment).message
+  end
+
+  test "should create comment when super" do
+    become_super
+    assert_difference("Comment.count", 1) do
+      get :create_comment, @basic_comment
+    end
+    assert_equal "Commented!", flash[:notice]
+    assert_redirected_to posts(:one)
+    assert Comment.exists?(post_id: @basic_comment[:post_id], message: @basic_comment[:comment][:message])
+    assert_equal @basic_comment[:post_id], assigns(:comment).post_id
+    assert_equal @basic_comment[:comment][:message], assigns(:comment).message
+  end
+
   private
 
   def build_basic_post_dict
@@ -233,6 +297,10 @@ class PostsControllerTest < ActionController::TestCase
                    message: "Message1",
                    category: categories(:homework1).name,
                    id: 1}
+  end
+
+  def build_basic_comment_dict
+    @basic_comment = {post_id: posts(:one).id, comment: {message: "Basic message"}}
   end
 
   def vote_exists?(user_id, post_id)

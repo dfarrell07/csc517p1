@@ -3,7 +3,7 @@ class PostsController < ApplicationController
   before_filter :get_post, only: [:show, :update, :edit, :destroy]
   before_filter :get_category, only: [:create]
   before_filter :get_category_list, only: [:new]
-  before_filter :check_logged_in, :only => [:new, :create, :edit, :update, :destroy, :up_vote]
+  before_filter :check_logged_in, :only => [:new, :create, :edit, :update, :destroy, :up_vote, :new_comment, :create_comment]
   before_filter :check_owns, :only => [:edit, :update]
   before_filter :check_owns_or_admin, :only => [:destroy]
   
@@ -27,6 +27,7 @@ class PostsController < ApplicationController
   def show
     @user_name = User.find(@post.user_id).user_name
     @category_name = Category.find(@post.category_id).name
+    @comments = Comment.where(post_id: @post.id)
   end
 
   def index
@@ -74,6 +75,27 @@ class PostsController < ApplicationController
     end
     redirect_to posts_path
   end
+
+  def new_comment
+    if logged_in?
+      @comment = Comment.new
+    end
+  end
+
+  def create_comment
+    #@comment = Comment.new(post_id: params[:post_id], message: params["message"])
+    @comment = Comment.new
+    @comment.post_id = params[:post_id]
+    @comment.message = params[:comment][:message]
+    @comment.user_id = session[:user_id]
+    if @comment.save
+      flash[:notice] = "Commented!"
+    else
+      flash[:error] = "Unable to save comment!"
+    end
+    redirect_to Post.find(params[:post_id])
+  end
+
 
   private
 

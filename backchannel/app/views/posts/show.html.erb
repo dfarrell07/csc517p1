@@ -4,11 +4,6 @@
 </p>
  
 <p>
-  <strong>Message:</strong>
-  <%= @post.message %>
-</p>
-
-<p>
   <strong>Category:</strong>
   <%= @category_name %>
 </p>
@@ -24,7 +19,29 @@
 </p>
 
 <p>
+  <strong>Message:</strong>
+  <%= @post.message %>
+</p>
+
+<p>
+  <strong>Comments:</strong>
+  <% if @comments.count == 0 %>
+    No comments! Be the first via the link below.
+  <% else %>
+    <% @comments.each do |comment| %>
+      <br /><br />
+      <tr>
+        <td>By: <%= User.exists?(comment.user_id) ? User.find(comment.user_id).user_name : "No such user!"  %></td><br />
+        <td>Message: <%= comment.message  %></td>
+      <tr>
+    <% end %>
+  <% end %>
+</p>
+
+
+<p>
   <%= link_to "Up Vote", up_vote_post_path(@post.id) %>
+  <%= link_to "Comment", new_comment_path(@post.id) %>
   <%= link_to "Edit", edit_post_path %>
   <%= link_to "Delete", post_path, :method => :delete  %>
   <%= link_to "New", new_post_path %>
